@@ -1,0 +1,11 @@
+{
+	"iss": "Online JWT Builder",
+	"iat": 1416797419,
+	"exp": 1448333419,
+	"aud": "www.example.com",
+	"sub": "jrocket@example.com",
+	"GivenName": "Johnny",
+	"Surname": "Rocket",
+	"Email": "jrocket@example.com",
+	"Role": ["Manager", "Project Administrator"]
+}

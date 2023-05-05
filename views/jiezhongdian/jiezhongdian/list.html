@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>接种点工作人员</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" href="../../../layuiadmin/layui/css/layui.css" media="all">
+	</head>
+	<body>
+		<div class="layui-fluid">
+			
+			
+			<div class="layui-card">
+				<!-- *************************************************** -->
+				<div class="layui-form layui-card-header layuiadmin-card-header-auto">
+					<div class="layui-form-item demoTable">
+						<div class="layui-inline">
+							<label class="layui-form-label">接种点</label>
+							<div class="layui-input-block">
+								<input type="text" id="name" name="name" placeholder="请输入" autocomplete="off"
+									class="layui-input">
+									 
+				
+							</div>
+						</div>
+				
+						<div class="layui-inline">
+							<button id="queryBtn" class="layui-btn layuiadmin-btn-useradmin" lay-submit
+								lay-filter="LAY-user-front-search">
+								<i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+				<!--********************************  -->
+				
+				
+				
+					<div class="layui-card-body">
+						<table id="myTable" lay-filter="test"></table>
+					</div>
+			</div>
+		</div>
+		
+		
+		<script type="text/html" id="toolbarDemo">
+		  <div class="layui-btn-container">
+		    <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+		    <!-- <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button> -->
+		    <!-- <button class="layui-btn layui-btn-sm" lay-event="update">编辑</button> -->
+			
+		  </div>
+		</script>
+		<script type="text/html" id="barDemo">
+		  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+		  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+		</script>
+		
+	</body>
+	
+	<script src="../../../layuiadmin/app.js"></script>
+	<script src="../../../layuiadmin/layui/layui.js"></script>
+	<script>
+		layui.use(['jquery', 'table','layer'], function() {
+			var table = layui.table;
+			window.jQuery = window.$ = layui.jquery;
+			var layer = layui.layer;
+
+			//方法级渲染
+			table.render({
+					elem: '#myTable',
+					toolbar: '#toolbarDemo',
+					method: "get",
+					url: server_url + '/jiezhongdian/pageQuery',
+					where: {
+						name: $("#name").val()						
+					},
+					cols: [[
+						{field: 'id',title: 'ID',width: 80,sort: true,fixed: true},
+						{field: 'name',title: '接种点',width: 300,sort: true},
+						{field:'sheng',title:'所属省',width:120},
+						{field:'shi',title:'所属市',width:120},
+						{field:'qu',title:'县（街办）',width:120},
+						{field:'address',title:'地址',width:300},
+						{fixed:"right",title:"操作",toolbar:"#barDemo", width:150}
+					]],
+					page: true,
+				}
+			);
+			
+			document.getElementById("queryBtn").onclick = function() {
+				console.log("...查询")
+				//执行重载
+				table.reload('myTable', {
+					page: {
+						curr: 1 //重新从第 1 页开始
+					},
+					where: {							
+						name: $("#name").val()							
+					}
+				});
+				return false;
+			
+			};
+			
+			// 添加数据表行工具栏事件件监听
+			table.on("toolbar(test)",function (obj){
+	
+				console.log(obj.event);
+				console.log(obj);
+				switch(obj.event){
+					case 'add':
+						        layer.open({
+								type: 2,
+								content: ["add.html"],   //添加页，后台controller转发到指定页
+								area: ["600px", "400px"],
+								title: ['接种点添加'],
+								fixed: false,
+								//maxmin: true,
+								shadeClose: true,
+								end: function () {  //刷新页面
+								  location.reload();
+								}
+							});
+						      break;
+						    
+						    };
+						});
+						
+						// 给table的行工具栏绑定事件
+						table.on('tool(test)',function(obj){
+							console.log(obj.event);
+							// console.log(obj.data);
+							switch(obj.event){
+							case 'del':
+								//询问框							
+								layer.msg('你确定要删除么？', {
+									time: 0 //不自动关闭
+									,btn: ['确认', '取消']
+									,yes: function(index){
+										$.getJSON('http://localhost:7000/jiezhongdian/delate?id='+obj.data.id,function(res){
+											if(res.success){
+												layer.close(index);
+												layer.msg('删除成功', { icon: 6 });
+												location.reload();
+											}else{
+												layer.close(index);
+												layer.msg('删除失败:'+res.message, { icon: 6 });
+											}
+										});
+										
+									}
+								});
+							break;
+							case 'edit':
+							
+								layer.open({
+									type: 2,
+									content: ["edit.html"],   //添加页，后台controller转发到指定页
+									area: ["600px", "400px"],
+									title: ['接种点添加'],
+									fixed: false,
+									//maxmin: true,
+									shadeClose: true,
+									end: function () {  //刷新页面
+										location.reload();
+									},
+									success: function(layero, index){
+										var body=layer.getChildFrame('body',index);//少了这个是不能从父页面向子页面传值的
+							　　　　　　　　//获取子页面的元素，进行数据渲染
+							　　　　　　body.contents().find("#id").val(obj.data.id); 
+										body.contents().find("#name").val(obj.data.name);
+										body.contents().find("#sheng").val(obj.data.sheng);
+										body.contents().find("#shi").val(obj.data.shi);
+										body.contents().find("#qu").val(obj.data.qu);
+										body.contents().find("#address").val(obj.data.address);
+							　　　　　　　
+									},
+								});
+												
+							    break;
+							}
+						})
+					});
+	
+	</script>
+	
+	
+</html>

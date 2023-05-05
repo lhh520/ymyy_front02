@@ -1,0 +1,179 @@
+<!-- 实现列表显示所有的admin数据 -->
+<!--1.演示文件layui。css  -->
+<!-- 2.<table> -->
+<!-- 3.js脚本 -->
+<!-- 4.编写script脚本渲染table -->
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!-- 1.引入样式 -->
+		<link href="../../../layuiadmin/layui/css/layui.css" rel="stylesheet"/>
+
+	</head>
+		
+	<body>
+		
+		<!-- *************************************************** -->
+		<div class="layui-form layui-card-header layuiadmin-card-header-auto">
+			<div class="layui-form-item demoTable">
+				<div class="layui-inline">
+					<label class="layui-form-label">用户名</label>
+					<div class="layui-input-block">
+						<input type="text" id="realName" name="realName" placeholder="请输入" autocomplete="off"
+							class="layui-input">
+							 
+		
+					</div>
+				</div>
+		
+				<div class="layui-inline">
+					<button id="queryBtn" class="layui-btn layuiadmin-btn-useradmin" lay-submit
+						lay-filter="LAY-user-front-search">
+						<i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+					</button>
+				</div>
+			</div>
+		</div>
+		<!--********************************  -->
+		<table class="layui-hide" id="adminTable" lay-filter="adminTable"></table>
+		<!-- table的头部工具栏********************************** -->
+		<script type="text/html" id="toolbarDemo" >
+		  <div class="layui-btn-container">
+		  <!--2. 创建一个table -->
+		    <button id="addBtn" class="layui-btn layui-btn-sm" lay-event="add">新增</button>
+
+		  </div>
+		  
+		</script>
+		
+		<!-- ******************添加行工具栏************** -->
+		<script type="text/html" id="rowbar">
+		  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+		  <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+		</script>
+		
+		
+	</body>
+	<!-- 3.引入layui.js -->
+	<script src="../../../layuiadmin/layui/layui.js"></script>
+
+	<!-- 4.编写js渲染table -->
+	<script>
+	var server="http://localhost:7000"
+	layui.use(['jquery','table','layer'],function(){
+		//加载执行table
+			var table = layui.table,layer=layui.layer;
+			var $=layui.jquery;
+			//取出token
+			tokenstr = localStorage.getItem("token")
+		  //渲染
+		  table.render({
+			elem: '#adminTable'
+			,url:server + '/admin/pageQueryAdmin'// 获取数据的地址
+			,toolbar: "#toolbarDemo"
+			,cellMinWidth: 80
+			,limits: [3,5,8,10,15,20]//这里是设置每页显示的个数的一个数组
+			,limit: 10//这是默认的每页要显示数据的个数
+			,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+			,cols: [[
+			  {field:'id', width:280, title: 'ID', sort: true}//sort排序
+			  ,{field:'username', width:450, title: '用户名'}
+			  ,{field:'realName', width:450, title: '真实姓名', sort: true},
+			   ,{fixed: 'right', title:'操作', toolbar: '#rowbar', width:150}
+
+			]]
+			,page:true//支持分页
+
+		  });
+		  document.getElementById("queryBtn").onclick = function() {
+		  	console.log("...查询")
+		  	//执行重载
+		  	table.reload('adminTable', {
+		  		page: {
+		  			curr: 1 //重新从第 1 页开始
+		  		},
+		  		where: {							
+		  			realName: $("#realName").val()							
+		  		}
+		  	});
+		  	return false;
+		  
+		  };
+		  
+
+		  	table.on('tool(adminTable)',function(obj){
+		  		console.log(obj)
+		  		switch(obj.event){
+		  			case 'edit':
+		  				layer.open({
+		  					type:2,
+		  					area:["450px",'500px'],
+							content:'edit.html',
+							success: function(layero, index){// edit.html加载完成后 执行的，页面元素复制 
+							console.log(layero, index); // 获取打开的iframe的对象 
+							var body = layer.getChildFrame('body', index); // 给username，根据id 找元素
+							 body.contents().find("#username").val(obj.data.username); 
+							 body.contents().find("#id").val(obj.data.id); 
+							 body.contents().find("#realName").val(obj.data.realName);
+							 body.contents().find("#password").val(obj.data.password);
+							   }
+		  				})
+		  			break;
+		  			case 'del':
+					layer.confirm('真的删除行么', function(index){
+					        obj.del();
+					        layer.close(index);
+					      });
+					$.ajax({
+						url: server+"/admin/admin/del?id="+obj.data.id,
+						type: "get",
+						header:{
+						"Content-Type": "application/x-www-form-urlencoded",
+						},
+					})
+
+		  			 break;
+		  		}
+		  	});
+			
+	
+	
+ 
+  // 头工具栏事件
+	$("#addBtn").on("click",function(){
+		console.log("Sfafassaf")
+		layer.open({
+				 type: 2,
+				 title: "新增",
+				 area: ['630px','360px'],
+				 shade: 0.8,
+				 closeBtn: 0,
+				 shadeClose: true,
+				 content: ['add.html']
+		});
+		
+	});
+	// table.on('tool(adminTable)',function(obj){
+	// 	console.log(obj)
+	// 	switch(obj.event){
+	// 		case 'add':
+	// 			layer.open({
+	// 				type:2,
+	// 				area:["450px",'500px'],
+	// 				content:'add.html',
+					
+	// 			})
+	// 		break;
+	// 		case 'del':
+	// 		console.log("del")
+	// 		break;
+	// 	}
+	// });
+	
+	
+	})
+	
+	</script>
+</html>

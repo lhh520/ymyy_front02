@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!-- 1.引入layui.css -->
+		<link href="../../../layuiadmin/layui/css/layui.css"  rel="stylesheet"/>
+		
+	</head>
+	<body>
+	<div class="layui-fluid">
+		 <br>
+		<form class="layui-form" action="">
+		  <div class="layui-form-item">
+		    <label class="layui-form-label">账号</label>
+		    <div class="layui-input-block">
+		      <input type="text" name="username" required="required" lay-verify="required|username" autocomplete="off" placeholder="请输入账号" class="layui-input">
+		    </div>
+	 </div>
+	 <div class="layui-form-item">
+	 		    <label class="layui-form-label">真实姓名</label>
+	 		    <div class="layui-input-block">
+	 		      <input type="text" name="realName" required="required" lay-verify="required|realName" autocomplete="off" placeholder="请输入真实姓名" class="layui-input">
+	 		    </div>
+	 </div>
+	 <div class="layui-form-item">
+	 		    <label class="layui-form-label">密码</label>
+	 		    <div class="layui-input-block">
+	 		      <input type="password" name="password" required="required" lay-verify="required|password" autocomplete="off" placeholder="请输入密码" class="layui-input">
+	 		    </div>
+	 </div>
+	 <div class="layui-form-item">
+			 <div class="layui-input-block"> 
+				 <button type="button" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button> 
+				 <button type="reset" class="layui-btn layui-btn-primary">重置</button> 
+			 </div> 
+	</div>
+		  </form>
+		  </div>
+		  <!-- 2.引入layui.js -->
+		  <script src="../../../layuiadmin/layui/layui.js"></script>
+		  
+		  <script>
+		  var server="http://localhost:7000"
+		  layui.use(["jquery","form","layer"],function(){
+			   var $=layui.jquery,form = layui.form,layer = layui.layer;
+			   //自定义验证规则
+			   form.verify({
+				   //账号
+				   username: function(value){
+					   if(value.length<5){
+						   return '账号至少得5个字符'
+					   }
+				   },
+				   //真实姓名
+				   realName:[/^[\u4e00-\u9fa5]{2,5}$/,'姓名必须2-5个汉字'],
+				   //密码
+					 password: [	 
+					   /^[\S]{6,12}$/
+					   ,'密码必须6到12位，且不能出现空格'
+					 ]
+			   })
+			   
+			   form.on("submit(demo1)",function(obj){
+							console.log(obj);
+							 console.log(JSON.stringify(obj.field))
+							 console.log($(".layui-form").serialize())   
+					$.ajax({
+						url: server+"/admin/admin/save",
+						type: "post",
+						header:{
+						"Content-Type": "application/x-www-form-urlencoded"
+						},
+						data:$(".layui-form").serialize(),
+					success:function(res){
+					 if(res=="ok"){
+						 console.log("新增成功");
+						 parent.layer.msg("新增成功")
+						 // 关闭层
+						 // 1.获取层的索引号
+						 var index =parent.layer.getFrameIndex(window.name);
+						 // 2.关闭层
+						 parent.layer.close(index);
+						 
+						 parent.location.reload();//重新加载页面
+					 }else{
+						 console.log(res);
+					 }
+				 },
+				 error:function(){
+					 console.log(".>>访问失败")
+				 }
+				 
+					})
+					return false;
+			   
+			   
+			   
+			  })
+			  
+		  })
+		  
+		  </script>
+		  
+	</body>
+</html>

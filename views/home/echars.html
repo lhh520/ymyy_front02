@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>第一个 ECharts 实例</title>
+    <!-- 引入 echarts.js -->
+	<script src="jquery.min.js"></script>
+    <script src="echarts.min.js"></script>
+	<style>
+		#main{
+			height:525px;
+			width:500px;
+			float: left;
+		}
+		#main1{
+			height: 500px;
+			width:750px;
+			float: left;
+		}
+	</style>
+</head>
+<body>
+    <!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+	<div class="wws">Vaccine appointment service follow-up data analysis platform</div>
+    <div id="main"></div>
+	
+	    <div id="main1"></div>
+		
+    <script type="text/javascript">
+	
+	
+	
+	
+	
+        // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('main'));
+        
+        $.get('http://localhost:7000/eCharts/charts').done(function (data) {
+            myChart.setOption({
+                title: {
+                    text: '预约跟进数据柱状图'
+                },
+                tooltip: {},
+                legend: {
+                    data:['人数']
+                },
+                xAxis: {
+                    data: ['预约总人数','签到总人数','预检总人数','接种总人数','留观总人数']
+                },
+                yAxis: {},
+                series: [{
+                    name: '人数',
+                    type: 'bar',
+                    data: data.data
+                }]
+            });
+        });
+		
+		var myChart1 = echarts.init(document.getElementById('main1'));
+		
+		$.get('http://localhost:7000/eCharts/lines').done(function (data) {
+		    myChart1.setOption({
+		            title: {
+		                text: '预约跟进数据折线图'
+		            },
+		            tooltip: {
+		                trigger: 'axis'
+		            },
+		            legend: {
+		                data: [ '签到人数', '预检人数', '接种人数', '留观人数','预约人数']
+		            },
+		            grid: {
+		                left: '3%',
+		                right: '4%',
+		                bottom: '3%',
+		                containLabel: true
+		            },
+		            toolbox: {
+		                feature: {
+		                    saveAsImage: {}
+		                }
+		            },
+		            xAxis: {
+		                type: 'category',
+		                boundaryGap: false,
+		                data: data.data.date
+		            },
+		            yAxis: {
+		                type: 'value'
+		            },
+		            series: [
+		                
+		                {
+		                    name: '签到人数',
+		                    type: 'line',
+		                    stack: '总量',
+		                    data: data.data.qiandao
+		                },
+		                {
+		                    name: '预检人数',
+		                    type: 'line',
+		                    stack: '总量',
+		                    data: data.data.yujian
+		                },
+		                {
+		                    name: '接种人数',
+		                    type: 'line',
+		                    stack: '总量',
+		                    data: data.data.jiezhong
+		                },
+		                {
+		                    name: '留观人数',
+		                    type: 'line',
+		                    stack: '总量',
+		                    data: data.data.liuguan
+		                },
+						{
+						    name: '预约人数',
+						    type: 'line',
+						    stack: '总量',
+						    data: data.data.yuyue
+						}
+		            ]
+		        });
+		});
+    </script>
+	<style>
+	.wws{
+		text-align:center;
+		color: #4169E1;
+		font-family:"Times New Roman",Times,serif;
+		font-size:40px;
+		line-height:70px;
+	}
+	</style>
+	
+	
+</body>
+</html>

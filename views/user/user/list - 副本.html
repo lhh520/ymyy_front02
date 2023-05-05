@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>layuiAdmin 网站用户</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" href="../../../layuiadmin/layui/css/layui.css" media="all">
+		<link rel="stylesheet" href="../../../layuiadmin/style/admin.css" media="all">
+	</head>
+	<body>
+
+		<div class="layui-fluid">
+			<div class="layui-card">
+				<div class="layui-form layui-card-header layuiadmin-card-header-auto">
+					<div class="layui-form-item demoTable">
+						<div class="layui-inline">
+							<label class="layui-form-label">用户名</label>
+							<div class="layui-input-block">
+								<input type="text" id="username" name="username" placeholder="请输入" autocomplete="off"
+									class="layui-input">
+							</div>
+						</div>
+
+						<div class="layui-inline">
+							<button id="queryBtn" class="layui-btn layuiadmin-btn-useradmin" lay-submit
+								lay-filter="LAY-user-front-search">
+								<i class="layui-icon layui-icon-search layuiadmin-button-btn"></i>
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="layui-card-body">				
+					<table id="userTable" lay-filter="test"></table>
+				</div>
+			</div>
+		</div>
+		<script type="text/html" id="toolbarDemo">
+		  <div class="layui-btn-container">
+		    <!-- <button class="layui-btn layui-btn-sm" lay-event="add">添加</button> -->
+		    <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+		    <!-- <button class="layui-btn layui-btn-sm" lay-event="update">编辑</button> -->
+		  </div>
+		</script>
+		<script type="text/html" id="barDemo">
+		  <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>
+		  <!-- <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a> -->
+		</script>
+		<script src="../../../layuiadmin/app.js"></script>
+		<script src="../../../layuiadmin/layui/layui.js"></script>
+		<script>
+			layui.use(['jquery', 'table'], function() {
+				var table = layui.table;
+				window.jQuery = window.$ = layui.jquery;
+
+				//方法级渲染
+				table.render({
+					
+					elem: '#userTable',
+					toolbar: '#toolbarDemo',
+					method: "post",
+					url: server_url + '/admin/pageQueryUser',
+					where: {
+						key: {
+							username: $("#username").val()
+						}
+					},
+					cols: [[
+						{checkbox: true,fixed: true}, 
+						{field: 'id',title: 'ID',width: 80,sort: true,fixed: true}, 
+						{field: 'username',title: '用户名',width: 80}, 
+						{field: 'realName',title: '真实姓名',width: 100},
+						{field: 'phone',title: "手机号码",width: 120}, 
+						{field: 'card',title: "身份证号",width: 200}, 
+						{field: 'address',title: "地址",width: 300},
+						{fixed: 'right', title:'操作', toolbar: '#barDemo', width:150}
+					]],
+					page: true,
+					// height: 510
+
+				});
+
+				document.getElementById("queryBtn").onclick = function() {
+					console.log("...查询")
+					//执行重载
+					table.reload('userTable', {
+						page: {
+							curr: 1 //重新从第 1 页开始
+						},
+						where: {							
+							username: $("#username").val()							
+						}
+					});
+					return false;
+
+				};
+				
+				table.on('toolbar(test)', function(obj){
+					var checkStatus = table.checkStatus(obj.config.id);
+					console.log(checkStatus)
+					console.log(obj)
+				    switch(obj.event){
+				      case 'add':
+				        layer.msg('添加');
+				      break;
+				      case 'delete':
+				        layer.msg('删除');
+				      break;
+				      case 'update':
+				        layer.msg('编辑');
+				      break;
+				    };
+				});
+				
+				// 給表格行工具栏添加监听事件
+				table.on('tool(test)', function(obj){
+				    switch(obj.event){
+						case 'view':
+							// 显示查看页面
+							layer.open({
+								title:'接种者用户信息',
+								type:2,
+								icon:5,
+								content:'view.html',
+								area:['500px','300px'],
+								success: function(layero, index){
+									var body=layer.getChildFrame('body',index);//少了这个是不能从父页面向子页面传值的
+						　　　　　　　　//获取子页面的元素，进行数据渲染
+						　　　　　　　body.contents().find("#username").val(obj.data.username);
+						　　　　　　  body.contents().find('#realName').val(obj.data.realName);
+						　　　　　　　body.contents().find('#card').val(obj.data.card);
+						　　　　　　　body.contents().find('#zhenshu').val(data.zhenshu);     
+						　　　　　　　
+								},
+							})
+						break;
+					}
+					
+				});
+				
+			});
+		</script>
+	</body>
+</html>
